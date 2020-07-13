@@ -29,6 +29,7 @@ export default App;
 
 import React from 'react';
 
+/*
 const initialStories = [
   {
     title: 'React',
@@ -55,6 +56,7 @@ const getAsyncStories = () =>
       2000
     )
   );
+*/
 
 const useSemiPersistentState = (key, initialState) => {
   const [value, setValue] = React.useState(
@@ -101,6 +103,8 @@ const storiesReducer = (state, action) => {
   }
 }
 
+const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+
 const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
@@ -113,11 +117,12 @@ const App = () => {
   React.useEffect(() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-    getAsyncStories()
+    fetch(`${API_ENDPOINT}react`)
+      .then(response => response.json())
       .then(result => {
         dispatchStories({
           type: 'STORIES_FETCH_SUCCESS',
-          payload: result.data.stories
+          payload: result.hits
         })
       })
       .catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
@@ -187,7 +192,7 @@ const Item = ( { item, onRemoveItem } ) => {
   return (
     <div>
       <span>
-        <a href={item.url}>{item.title}</a>
+        <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
       </span>
       <span> {item.author} </span>
       <span>{item.num_comments} </span>
