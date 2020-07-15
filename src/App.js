@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 
-import './App.css';
+import styles from './App.module.css';
 
 // Custom hook to manage state yet synchronize with local storage, hence semi persistent.
 const useSemiPersistentState = (key, initialState) => {
@@ -120,19 +120,19 @@ const App = () => {
 
   // Component definition for SearchForm to be used in return statement
   const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-    <form onSubmit={onSearchSubmit} className="search-form">
+    <form onSubmit={onSearchSubmit} className={styles.searchForm}>
       <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={onSearchInput}>
         <strong>Search:</strong>
       </InputWithLabel>
 
-      <button type="submit" disabled={!searchTerm} className="button button_large">Submit</button>
+      <button type="submit" disabled={!searchTerm} className={`${styles.button} ${styles.buttonLarge}`}>Submit</button>
     </form>
   );
 
   // Return code that will be used in index.js
   return (  
-    <div className="container">
-      <h1 className="headline-primary">My Hacker Stories</h1>
+    <div className={styles.container}>
+      <h1 className={styles.headlinePrimary}>My Hacker Stories</h1>
 
       <SearchForm searchTerm={searchTerm} onSearchInput={handleSearchInput} onSearchSubmit={handleSearchSubmit} />
       
@@ -165,9 +165,9 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
 
   return(
     <>
-      <label htmlFor={id} className="label">{children}</label>&nbsp;
+      <label htmlFor={id} className={styles.label}>{children}</label>&nbsp;
       {/* Pass the ref object into the ref attribute of the input tag */}
-      <input ref={inputRef} id={id} type={type} value={value} onChange={onInputChange} className="input" />
+      <input ref={inputRef} id={id} type={type} value={value} onChange={onInputChange} className={styles.input} />
     </>
   )  
 }
@@ -176,10 +176,10 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
 const List = ({ list, onRemoveItem }) => 
   list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />);
 
-// Item component that shows a story's details
+// Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
 const Item = ( { item, onRemoveItem } ) => {
   return (
-    <div className="item">
+    <div className={styles.item}>
       <span style={{ width: '40%' }}>
         <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a> {/* noopener and noreferrer prevents hacking when target is blank */}
       </span>
@@ -187,7 +187,7 @@ const Item = ( { item, onRemoveItem } ) => {
       <span style={{ width: '10%' }}>{item.num_comments} </span>
       <span style={{ width: '10%' }}>{item.points}</span>
       <span style={{ width: '10%' }}>
-        <button type="button" onClick={() => onRemoveItem(item)} className="button button_small">
+        <button type="button" onClick={() => onRemoveItem(item)} className={`${styles.button} ${styles.buttonSmall}`}>
           Dismiss
         </button>
       </span>
