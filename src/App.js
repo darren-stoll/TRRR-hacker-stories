@@ -94,75 +94,8 @@ import './App.css';
 
 /* END STYLE DEFINITIONS */
 
-// Custom types to be used in Item and other components
-type Story = {
-  objectID: string;
-  url: string;
-  title: string;
-  author: string;
-  num_comments: string;
-  points: number;
-}
-
-type ItemProps = {
-  item: Story;
-  onRemoveItem: (item: Story) => void;
-};
-
-type Stories = Array<Story>;
-
-type ListProps = {
-  list: Stories;
-  onRemoveItem: (item: Story) => void;
-}
-
-type StoriesState = {
-  data: Stories;
-  isLoading: boolean;
-  isError: boolean;
-};
-
-interface StoriesFetchInitAction {
-  type: 'STORIES_FETCH_INIT';
-}
-
-interface StoriesFetchSuccessAction {
-  type: 'STORIES_FETCH_SUCCESS';
-  payload: Stories;
-}
-
-interface StoriesFetchFailureAction {
-  type: 'STORIES_FETCH_FAILURE';
-}
-
-interface StoriesRemoveAction {
-  type: 'REMOVE_STORY';
-  payload: Story;
-}
-
-type StoriesAction = 
-  | StoriesFetchInitAction
-  | StoriesFetchSuccessAction
-  | StoriesFetchFailureAction
-  | StoriesRemoveAction;
-
-type SearchFormProps = {
-  searchTerm: string;
-  onSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSearchSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-};
-
-type InputWithLabelProps = {
-  id: string;
-  value: string;
-  type?: string;
-  onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isFocused?: boolean;
-  children: React.ReactNode;
-}
-
 // Custom hook to manage state yet synchronize with local storage, hence semi persistent.
-const useSemiPersistentState = (key: string, initialState: string): [string, (newValue: string) => void] => {
+const useSemiPersistentState = (key, initialState) => {
   // Define the value variable and setValue function from a useState hook. If a value already exists, set it to that. Otherwise, go to initialState
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState
@@ -178,7 +111,7 @@ const useSemiPersistentState = (key: string, initialState: string): [string, (ne
 }
 
 // Reducer variable to handle different state cases for stories; will be used later in useReducer hook
-const storiesReducer = (state: StoriesState, action: StoriesAction) => {
+const storiesReducer = (state, action) => {
   switch (action.type) {
     // Initial stories state, where it is loading w/o error.
     case 'STORIES_FETCH_INIT':
@@ -256,7 +189,7 @@ const App = () => {
   }, [handleFetchStories]);
 
   // Function for handling deleted story from query
-  const handleRemoveStory = (item: Story) => {
+  const handleRemoveStory = (item) => {
     dispatchStories({
       type: 'REMOVE_STORY',
       payload: item
@@ -264,17 +197,40 @@ const App = () => {
   }
 
   // Function that handles the search input in the text box and sets the search term in the state
-  const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
   };
 
   // Function that handles the submission of the form for the search. Sets the url in the state.
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
 
     // Prevents browser from reloading when search is submitted
     event.preventDefault();
   }
+
+  // Component definition for SearchForm to be used in return statement
+  const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
+    
+    <form onSubmit={onSearchSubmit} className="search-form">
+      <InputWithLabel
+        id="search"
+        value={searchTerm}
+        isFocused
+        onInputChange={onSearchInput}
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
+
+      <button
+        type="submit"
+        disabled={!searchTerm}
+        className="button button_large"
+      >
+        Submit
+      </button>
+    </form>
+  );
 
   // Return code that will be used in index.js
   return (
@@ -298,33 +254,10 @@ const App = () => {
   );
 };
 
-  // Component definition for SearchForm to be used in return statement
-  const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }: SearchFormProps) => (
-    
-    <form onSubmit={onSearchSubmit} className="search-form">
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused
-        onInputChange={onSearchInput}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-
-      <button
-        type="submit"
-        disabled={!searchTerm}
-        className="button button_large"
-      >
-        Submit
-      </button>
-    </form>
-  );
-
 // Component definition for InputWithLabel to be used in return statement.
-const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, children }: InputWithLabelProps) => {
+const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, children }) => {
   // Declare a mutable ref object that can be used to access the DOM. current property of ref can be changed
-  const inputRef = React.useRef<HTMLInputElement>(null!);
+  const inputRef = React.useRef();
 
   // Side-effect hook that puts the cursor in the input field (text box) when the browser page loads
   React.useEffect(() => {
@@ -353,14 +286,11 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
 }
 
 // List component that contains the query of items from the search
-const List = ({ list, onRemoveItem }: ListProps) => (
-  <>
-    {list.map((item) => (<Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />))};
-  </>
-);
+const List = ({ list, onRemoveItem }) => 
+  list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />);
 
 // Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
-const Item = ({ item, onRemoveItem }: ItemProps ) => {
+const Item = ( { item, onRemoveItem } ) => {
   return (
     <div className="item">
       <span style={{ width: '40%' }}>
