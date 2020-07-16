@@ -1,96 +1,96 @@
 import React from 'react';
 import axios from 'axios';
-import styled from 'styled-components';
+//import styled from 'styled-components';
 import {ReactComponent as Check} from './check.svg';
 
-//import styles from './App.module.css';
+import './App.css';
 
 /* START STYLE DEFINITIONS (CSS-in-JS) */
-const StyledContainer = styled.div`
-  height: 100vw;
-  padding: 20px;
+// const StyledContainer = styled.div`
+//   height: 100vw;
+//   padding: 20px;
 
-  background: #83a4d4;
-  background: linear-gradient(to left, #b6fbff, #83a4d4);
+//   background: #83a4d4;
+//   background: linear-gradient(to left, #b6fbff, #83a4d4);
 
-  color: #171212;
-`;
+//   color: #171212;
+// `;
 
-const StyledHeadlinePrimary = styled.h1`
-  font-size: 48px;
-  font-weight: 300;
-  letter-spacing: 2px;
-`;
+// const StyledHeadlinePrimary = styled.h1`
+//   font-size: 48px;
+//   font-weight: 300;
+//   letter-spacing: 2px;
+// `;
 
-const StyledItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding-bottom: 5px;
-`;
+// const StyledItem = styled.div`
+//   display: flex;
+//   align-items: center;
+//   padding-bottom: 5px;
+// `;
 
-const StyledColumn = styled.span`
-  padding: 0 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+// const StyledColumn = styled.span`
+//   padding: 0 5px;
+//   white-space: nowrap;
+//   overflow: hidden;
+//   white-space: nowrap;
+//   text-overflow: ellipsis;
 
-  a {
-    color: inherit;
-  } 
-  /* width is defined as a property of the style's component */
-  width: ${props => props.width};
-`;
+//   a {
+//     color: inherit;
+//   } 
+//   /* width is defined as a property of the style's component */
+//   width: ${props => props.width};
+// `;
 
-const StyledButton = styled.button`
-  background: transparent;
-  border: 1px solid #171212;
-  padding: 5px;
-  cursor: pointer;
+// const StyledButton = styled.button`
+//   background: transparent;
+//   border: 1px solid #171212;
+//   padding: 5px;
+//   cursor: pointer;
 
-  transition: all 0.1s ease-in;
+//   transition: all 0.1s ease-in;
 
-  /* Selects the current element with the & CSS operator */
-  &:hover {
-    background: #171212;
-    color: #ffffff;
-  }
+//   /* Selects the current element with the & CSS operator */
+//   &:hover {
+//     background: #171212;
+//     color: #ffffff;
+//   }
 
-  &:hover > svg > g {
-    fill: #ffffff;
-    stroke: #ffffff;
-  }
-`;
+//   &:hover > svg > g {
+//     fill: #ffffff;
+//     stroke: #ffffff;
+//   }
+// `;
 
-// styled(CSS Component) receives all the base styles from the previously defined component
-const StyledButtonSmall = styled(StyledButton)`
-  padding: 5px;
-`;
+// // styled(CSS Component) receives all the base styles from the previously defined component
+// const StyledButtonSmall = styled(StyledButton)`
+//   padding: 5px;
+// `;
 
-const StyledButtonLarge = styled(StyledButton) `
-  padding: 10px;
-`;
+// const StyledButtonLarge = styled(StyledButton) `
+//   padding: 10px;
+// `;
 
-const StyledSearchForm = styled.form`
-  padding: 10px 0 20px 0;
-  display: flex;
-  align-items: baseline;
-`;
+// const StyledSearchForm = styled.form`
+//   padding: 10px 0 20px 0;
+//   display: flex;
+//   align-items: baseline;
+// `;
 
-const StyledLabel = styled.label`
-  border-top: 1px solid #171212;
-  border-left: 1px solid #171212;
-  padding-left: 5px;
-  font-size: 24px;
-`;
+// const StyledLabel = styled.label`
+//   border-top: 1px solid #171212;
+//   border-left: 1px solid #171212;
+//   padding-left: 5px;
+//   font-size: 24px;
+// `;
 
-const StyledInput = styled.input`
-  border: none;
-  border-bottom: 1px solid #171212;
-  background-color: transparent;
+// const StyledInput = styled.input`
+//   border: none;
+//   border-bottom: 1px solid #171212;
+//   background-color: transparent;
 
-  font-size: 24px;
-`;
+//   font-size: 24px;
+// `;
 
 /* END STYLE DEFINITIONS */
 
@@ -211,34 +211,46 @@ const App = () => {
 
   // Component definition for SearchForm to be used in return statement
   const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-    <StyledSearchForm onSubmit={onSearchSubmit}>
-      <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={onSearchInput}>
+    
+    <form onSubmit={onSearchSubmit} className="search-form">
+      <InputWithLabel
+        id="search"
+        value={searchTerm}
+        isFocused
+        onInputChange={onSearchInput}
+      >
         <strong>Search:</strong>
       </InputWithLabel>
 
-      <StyledButtonLarge type="submit" disabled={!searchTerm}>Submit</StyledButtonLarge>
-    </StyledSearchForm>
+      <button
+        type="submit"
+        disabled={!searchTerm}
+        className="button button_large"
+      >
+        Submit
+      </button>
+    </form>
   );
 
   // Return code that will be used in index.js
-  return (  
-    <StyledContainer>
-      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+  return (
+    <div className="container">
+      <h1 className="headline-primary">My Hacker Stories</h1>
 
-      <SearchForm searchTerm={searchTerm} onSearchInput={handleSearchInput} onSearchSubmit={handleSearchSubmit} />
-      
-      {/* If an error is present in the stories state, return error message */}
-      {stories.isError && <p>Something went wrong ... </p>}
-      {/* Else if stories state is in loading, return loading message */}
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
+
+      {stories.isError && <p>Something went wrong ...</p>}
+
       {stories.isLoading ? (
         <p>Loading ...</p>
       ) : (
-        // Else return actual List component with stories data
         <List list={stories.data} onRemoveItem={handleRemoveStory} />
       )}
-      
-    </StyledContainer>
-  
+    </div>
   );
 };
 
@@ -256,9 +268,19 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
 
   return(
     <>
-      <StyledLabel htmlFor={id}>{children}</StyledLabel>&nbsp;
+      <label htmlFor={id} className="label">
+        {children}
+      </label>
+      &nbsp;
       {/* Pass the ref object into the ref attribute of the input tag */}
-      <StyledInput ref={inputRef} id={id} type={type} value={value} onChange={onInputChange} />
+      <input
+        ref={inputRef}
+        id={id}
+        type={type}
+        value={value}
+        onChange={onInputChange}
+        className="input"
+      />
     </>
   )  
 }
@@ -270,19 +292,23 @@ const List = ({ list, onRemoveItem }) =>
 // Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
 const Item = ( { item, onRemoveItem } ) => {
   return (
-    <StyledItem>
-      <StyledColumn width='40%'>
+    <div className="item">
+      <span style={{ width: '40%' }}>
         <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a> {/* noopener and noreferrer prevents hacking when target is blank */}
-      </StyledColumn>
-      <StyledColumn width='30%'>{item.author}</StyledColumn>
-      <StyledColumn width='10%'>{item.num_comments} </StyledColumn>
-      <StyledColumn width='10%'>{item.points}</StyledColumn>
-      <StyledColumn width='10%'>
-        <StyledButtonSmall type="button" onClick={() => onRemoveItem(item)}>
+      </span>
+      <span style={{ width: '30%' }}>{item.author}</span>
+      <span style={{ width: '10%' }}>{item.num_comments}</span>
+      <span style={{ width: '10%' }}>{item.points}</span>
+      <span style={{ width: '10%' }}>
+        <button
+          type="button"
+          onClick={() => onRemoveItem(item)}
+          className="button button_small"
+        >
           <Check height="18px" width="18px" />
-        </StyledButtonSmall>
-      </StyledColumn>
-    </StyledItem>
+        </button>
+      </span>
+    </div>
   );
 }
 /* APPLICATION END */
