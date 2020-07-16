@@ -96,6 +96,8 @@ const StyledInput = styled.input`
 
 // Custom hook to manage state yet synchronize with local storage, hence semi persistent.
 const useSemiPersistentState = (key, initialState) => {
+  const isMounted = React.useRef(false);
+  
   // Define the value variable and setValue function from a useState hook. If a value already exists, set it to that. Otherwise, go to initialState
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState
@@ -103,7 +105,12 @@ const useSemiPersistentState = (key, initialState) => {
 
   // Side-effect where item is set in local storage based on key provided in argument to value.
   React.useEffect(() => {
-    localStorage.setItem(key, value);
+    // The item in local storage doesn't have to be set on the first go-through, so skip it with a boolean that works after every re-render.
+    if (!isMounted.current) {
+      isMounted.current = true;
+    } else {
+      localStorage.setItem(key, value);  
+    }
   }, [value, key]);
 
   // Return the new value (based on key) var and the setValue func defined in useState.
@@ -147,6 +154,14 @@ const storiesReducer = (state, action) => {
       throw new Error();
   }
 }
+
+// Function used to prevent re-running expensive computations.
+const getSumComments = stories => {
+  return stories.data.reduce(
+    (result, value) => result + value.num_comments,
+    0
+  );
+};
 
 // API endpoint for pulling data from hacker stories site
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
@@ -209,6 +224,11 @@ const App = () => {
     event.preventDefault();
   }
 
+  // useMemo to prevent running if the dependency stays the same
+  const sumComments = React.useMemo(() => getSumComments(stories), [
+    stories,
+  ]);
+
   // Component definition for SearchForm to be used in return statement
   const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
     <StyledSearchForm onSubmit={onSearchSubmit}>
@@ -223,7 +243,7 @@ const App = () => {
   // Return code that will be used in index.js
   return (  
     <StyledContainer>
-      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+      <StyledHeadlinePrimary>My Hacker Stories with {sumComments} comments.</StyledHeadlinePrimary>
 
       <SearchForm searchTerm={searchTerm} onSearchInput={handleSearchInput} onSearchSubmit={handleSearchSubmit} />
       
@@ -263,9 +283,9 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
   )  
 }
 
-// List component that contains the query of items from the search
-const List = ({ list, onRemoveItem }) => 
-  list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />);
+// List component that contains the query of items from the search; use React.memo to see if any of the dependencies have changed
+const List = React.memo(({ list, onRemoveItem }) => 
+  list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />));
 
 // Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
 const Item = ( { item, onRemoveItem } ) => {
