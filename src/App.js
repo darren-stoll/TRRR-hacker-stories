@@ -119,29 +119,6 @@ const App = () => {
     event.preventDefault();
   }
 
-  // Component definition for SearchForm to be used in return statement
-  const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-    
-    <form onSubmit={onSearchSubmit} className="search-form">
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused
-        onInputChange={onSearchInput}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-
-      <button
-        type="submit"
-        disabled={!searchTerm}
-        className="button button_large"
-      >
-        Submit
-      </button>
-    </form>
-  );
-
   // Return code that will be used in index.js
   return (
     <div className="container">
@@ -163,6 +140,29 @@ const App = () => {
     </div>
   );
 };
+
+// Component definition for SearchForm to be used in return statement
+const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
+  
+  <form onSubmit={onSearchSubmit} className="search-form">
+    <InputWithLabel
+      id="search"
+      value={searchTerm}
+      isFocused
+      onInputChange={onSearchInput}
+    >
+      <strong>Search:</strong>
+    </InputWithLabel>
+
+    <button
+      type="submit"
+      disabled={!searchTerm}
+      className="button button_large"
+    >
+      Submit
+    </button>
+  </form>
+);
 
 // Component definition for InputWithLabel to be used in return statement.
 const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, children }) => {
@@ -225,3 +225,6 @@ const Item = ( { item, onRemoveItem } ) => {
 
 // Export the App to the page that is importing it for use. In this case, it is index.js
 export default App;
+
+// Export components for testing
+export { storiesReducer, SearchForm, InputWithLabel, List, Item };
