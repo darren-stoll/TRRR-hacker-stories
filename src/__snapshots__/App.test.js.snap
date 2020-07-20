@@ -8,7 +8,9 @@ exports[`SearchForm renders snapshot 1`] = `
     class="label"
     for="search"
   >
-    Search:
+    <strong>
+      Search:
+    </strong>
   </label>
    
   <input
