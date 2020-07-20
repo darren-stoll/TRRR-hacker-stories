@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import {ReactComponent as Check} from './check.svg';
+import SearchForm, { InputWithLabel } from './SearchForm';
+import List, { Item } from './List';
 
 import './App.css';
 
@@ -141,90 +142,10 @@ const App = () => {
   );
 };
 
-// Component definition for SearchForm to be used in return statement
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-  
-  <form onSubmit={onSearchSubmit} className="search-form">
-    <InputWithLabel
-      id="search"
-      value={searchTerm}
-      isFocused
-      onInputChange={onSearchInput}
-    >
-      <strong>Search:</strong>
-    </InputWithLabel>
-
-    <button
-      type="submit"
-      disabled={!searchTerm}
-      className="button button_large"
-    >
-      Submit
-    </button>
-  </form>
-);
-
-// Component definition for InputWithLabel to be used in return statement.
-const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, children }) => {
-  // Declare a mutable ref object that can be used to access the DOM. current property of ref can be changed
-  const inputRef = React.useRef();
-
-  // Side-effect hook that puts the cursor in the input field (text box) when the browser page loads
-  React.useEffect(() => {
-    if (isFocused && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isFocused])
-
-  return(
-    <>
-      <label htmlFor={id} className="label">
-        {children}
-      </label>
-      &nbsp;
-      {/* Pass the ref object into the ref attribute of the input tag */}
-      <input
-        ref={inputRef}
-        id={id}
-        type={type}
-        value={value}
-        onChange={onInputChange}
-        className="input"
-      />
-    </>
-  )  
-}
-
-// List component that contains the query of items from the search
-const List = ({ list, onRemoveItem }) => 
-  list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />);
-
-// Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
-const Item = ( { item, onRemoveItem } ) => {
-  return (
-    <div className="item">
-      <span style={{ width: '40%' }}>
-        <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a> {/* noopener and noreferrer prevents hacking when target is blank */}
-      </span>
-      <span style={{ width: '30%' }}>{item.author}</span>
-      <span style={{ width: '10%' }}>{item.num_comments}</span>
-      <span style={{ width: '10%' }}>{item.points}</span>
-      <span style={{ width: '10%' }}>
-        <button
-          type="button"
-          onClick={() => onRemoveItem(item)}
-          className="button button_small"
-        >
-          <Check height="18px" width="18px" />
-        </button>
-      </span>
-    </div>
-  );
-}
 /* APPLICATION END */
 
 // Export the App to the page that is importing it for use. In this case, it is index.js
 export default App;
 
 // Export components for testing
-export { storiesReducer, SearchForm, InputWithLabel, List, Item };
+export { storiesReducer, SearchForm, Item, List, InputWithLabel };
