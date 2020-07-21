@@ -37,7 +37,11 @@ const storiesReducer = (state, action) => {
         ...state,
         isLoading: false,
         isError: false,
-        data: action.payload
+        data: 
+          action.payload.list === 0
+            ? action.payload.list
+            : state.data.concat(action.payload.list),
+        page: action.payload.page
       };
     // Failed stories state. Returns an error.
     case 'STORIES_FETCH_FAILURE':
@@ -59,11 +63,17 @@ const storiesReducer = (state, action) => {
   }
 }
 
-// API endpoint for pulling data from hacker stories site
-const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+// API definitions for pulling data from hacker stories site
+const API_BASE = "https://hn.algolia.com/api/v1";
+const API_SEARCH = '/search';
+const PARAM_SEARCH = 'query='
+const PARAM_PAGE = 'page='
+
+// Function that holds the url search
+const getUrl = (searchTerm, page) => `${API_BASE}${API_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
 
 // URL is too long to have in a button, so replace with an empty string
-const extractSearchTerm = url => url.replace(API_ENDPOINT, '');
+const extractSearchTerm = url => url.substring(url.lastIndexOf('?') + 1, url.lastIndexOf('&')).replace(PARAM_SEARCH, '');
 
 // Get the last 5 searches to be shown as buttons
 const getLastSearches = urls => 
@@ -85,9 +95,6 @@ const getLastSearches = urls =>
   .slice(0, -1);
 
 
-// Function that holds the url search
-const getUrl = searchTerm => `${API_ENDPOINT}${searchTerm}`;
-
 /* APPLICATION START */
 const App = () => {
 
@@ -95,12 +102,12 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
   // Create new urls var and setUrls func that's based on the url and query strings in the address bar, or the API that we are using.
-  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
+  const [urls, setUrls] = React.useState([getUrl(searchTerm, 0)]);
 
   // Define stories var and dispatchStories func in useReducer hook. Uses storiesReducer defined above + initializes values.
   const [stories, dispatchStories] = React.useReducer(
     storiesReducer, 
-    { data: [], isLoading: false, isError: false}
+    { data: [], page: 0, isLoading: false, isError: false}
   );
 
   // Returns memoized (only changes if dependencies change) callback for searching stories. Async done to do things in proper order.
@@ -113,7 +120,10 @@ const App = () => {
 
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
-        payload: result.data.hits
+        payload: {
+          list: result.data.hits,
+          page: result.data.page
+        }
       });
     } catch {
       dispatchStories({ type: 'STORIES_FETCH_FAILURE'});
@@ -140,7 +150,7 @@ const App = () => {
 
   // Function that handles the submission of the form for the search. Sets the url in the state.
   const handleSearchSubmit = (event) => {
-    handleSearch(searchTerm);
+    handleSearch(searchTerm, 0);
 
     // Prevents browser from reloading when search is submitted
     event.preventDefault();
@@ -150,17 +160,24 @@ const App = () => {
   const handleLastSearch = searchTerm => {
     setSearchTerm(searchTerm);
 
-    handleSearch(searchTerm);
+    handleSearch(searchTerm, 0);
   };
 
   // Consolidated function for setting urls in urls state var
-  const handleSearch = searchTerm => {
-    const url = getUrl(searchTerm);
+  const handleSearch = (searchTerm, page) => {
+    const url = getUrl(searchTerm, page);
     setUrls(urls.concat(url));
   }
 
   // Get the last 5 searches made and store in an array variable
   const lastSearches = getLastSearches(urls);
+
+  // Method to handle incrementing a page
+  const handleMore = () => {
+    const lastUrl = urls[urls.length - 1];
+    const searchTerm = extractSearchTerm(lastUrl);
+    handleSearch(searchTerm, stories.page + 1);
+  };
 
   // Return code that will be used in index.js
   return (
@@ -177,10 +194,14 @@ const App = () => {
 
       {stories.isError && <p>Something went wrong ...</p>}
 
+      <List list={stories.data} onRemoveItem={handleRemoveStory} />
+
       {stories.isLoading ? (
         <p>Loading ...</p>
       ) : (
-        <List list={stories.data} onRemoveItem={handleRemoveStory} />
+        <button type="button" onClick={handleMore}>
+          More
+        </button>  
       )}
     </div>
   );
