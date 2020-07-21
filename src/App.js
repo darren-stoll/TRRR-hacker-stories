@@ -66,27 +66,24 @@ const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 const extractSearchTerm = url => url.replace(API_ENDPOINT, '');
 
 // Get the last 5 searches to be shown as buttons
-const getLastSearches = urls => {
-  urls
-    .reduce((result, url, index) => {
-      const searchTerm = extractSearchTerm(url);
+const getLastSearches = urls => 
+  urls.reduce((result, url, index) => {
+    const searchTerm = extractSearchTerm(url);
+    if (index === 0) {
+      return result.concat(searchTerm);
+    }
 
-      if (index === 0) {
-        return result.concat(searchTerm);
-      }
+    const previousSearchTerm = result[result.length - 1];
 
-      // This prevents duplicates of buttons of the same search term
-      const previousSearchTerm = result[result.length - 1];
+    if (searchTerm === previousSearchTerm) {
+      return result;
+    } else {
+      return result.concat(searchTerm);
+    }
+  }, [])
+  .slice(-6)
+  .slice(0, -1);
 
-      if (searchTerm === previousSearchTerm) {
-        return result;
-      } else {
-        return result.concat(searchTerm);
-      }
-    }, []) // Reduce function starts with an empty array as it's result var
-    .slice(-6)
-    .slice(0, -1);
-}
 
 // Function that holds the url search
 const getUrl = searchTerm => `${API_ENDPOINT}${searchTerm}`;
@@ -151,7 +148,6 @@ const App = () => {
 
   // Function that handles the most recent search made
   const handleLastSearch = searchTerm => {
-    // If the corresponding button is clicked, it sets the searchTerm to that
     setSearchTerm(searchTerm);
 
     handleSearch(searchTerm);
@@ -318,7 +314,6 @@ const Item = ( { item, onRemoveItem } ) => {
   );
 }
 
-// LastSearches component that handles the row of buttons of the previous 5 searches
 const LastSearches = ({ lastSearches, onLastSearch }) => (
   <>
     {/* Give the searchTerm an index so that reused searches won't break it */}
@@ -328,8 +323,7 @@ const LastSearches = ({ lastSearches, onLastSearch }) => (
       </button>
     ))}
   </>
-);
-
+)
 /* APPLICATION END */
 
 // Export the App to the page that is importing it for use. In this case, it is index.js
