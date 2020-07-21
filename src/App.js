@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {ReactComponent as Check} from './check.svg';
+import { sortBy } from 'lodash';
 
 import './App.css';
 
@@ -195,9 +196,48 @@ const InputWithLabel = ({ id, type="text", value, onInputChange, isFocused, chil
   )  
 }
 
+// Dictionary object that handles the sorting options for List by state
+const SORTS = {
+  NONE: list => list,
+  TITLE: list => sortBy(list, 'title'),
+  AUTHOR: list => sortBy(list, 'author'),
+  COMMENT: list => sortBy(list, 'num_comments').reverse(),
+  POINT: list => sortBy(list, 'points').reverse()
+}
+
 // List component that contains the query of items from the search
-const List = ({ list, onRemoveItem }) => 
-  list.map((item) => <Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />);
+const List = ({ list, onRemoveItem }) => {
+  const [sort, setSort] = React.useState('NONE');
+
+  // Take the state and apply it to a new sortFunction before generating the new sortedList to be mapped over
+  const handleSort = (sortKey) => {
+    setSort(sortKey);
+  }
+
+  const sortFunction = SORTS[sort];
+  const sortedList = sortFunction(list);
+
+  return (
+    <div>
+      <div style={{display: 'flex'}}>
+        <span style={{width:'40%'}}>
+          <button id="TITLE" type="button" onClick={() => handleSort('TITLE')}>Title</button>
+        </span>
+        <span style={{width:'30%'}}>
+          <button id="AUTHOR" type="button" onClick={() => handleSort('AUTHOR')}>Author</button>
+        </span>
+        <span style={{width:'10%'}}>
+          <button id="COMMENT" type="button" onClick={() => handleSort('COMMENT')}>Comments</button>
+        </span>
+        <span style={{width:'10%'}}>
+          <button id="POINT" type="button" onClick={() => handleSort('POINT')}>Points</button>
+        </span>
+        <span style={{width:'10%'}}>Actions</span>
+      </div>
+      {sortedList.map((item) => (<Item key={item.objectID} item= {item} onRemoveItem={onRemoveItem} />))};
+    </div>
+  )
+};
 
 // Item component that shows a story's details of the title, author, number of comments, and points, along with a Dismiss button to remove from the query
 const Item = ( { item, onRemoveItem } ) => {
