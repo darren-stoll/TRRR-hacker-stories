@@ -199,7 +199,7 @@ const App = () => {
       {stories.isLoading ? (
         <p>Loading ...</p>
       ) : (
-        <button type="button" onClick={handleMore}>
+        <button type="button" onClick={handleMore}> {/* Button that allows you to generate more stories at the bottom */}
           More
         </button>  
       )}
