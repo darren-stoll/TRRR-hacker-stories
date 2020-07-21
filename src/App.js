@@ -62,16 +62,43 @@ const storiesReducer = (state, action) => {
 // API endpoint for pulling data from hacker stories site
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
+// URL is too long to have in a button, so replace with an empty string
+const extractSearchTerm = url => url.replace(API_ENDPOINT, '');
+
+// Get the last 5 searches to be shown as buttons
+const getLastSearches = urls => {
+  urls
+    .reduce((result, url, index) => {
+      const searchTerm = extractSearchTerm(url);
+
+      if (index === 0) {
+        return result.concat(searchTerm);
+      }
+
+      // This prevents duplicates of buttons of the same search term
+      const previousSearchTerm = result[result.length - 1];
+
+      if (searchTerm === previousSearchTerm) {
+        return result;
+      } else {
+        return result.concat(searchTerm);
+      }
+    }, []) // Reduce function starts with an empty array as it's result var
+    .slice(-6)
+    .slice(0, -1);
+}
+
+// Function that holds the url search
+const getUrl = searchTerm => `${API_ENDPOINT}${searchTerm}`;
+
 /* APPLICATION START */
 const App = () => {
 
   // Define searchTerm var and setSearchTerm func based on custom hook above.
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
-  // Create new url var and setUrl func that's based on the url and query strings in the address bar, or the API that we are using.
-  const [url, setUrl] = React.useState(
-    `${API_ENDPOINT}${searchTerm}`
-  );
+  // Create new urls var and setUrls func that's based on the url and query strings in the address bar, or the API that we are using.
+  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
 
   // Define stories var and dispatchStories func in useReducer hook. Uses storiesReducer defined above + initializes values.
   const [stories, dispatchStories] = React.useReducer(
@@ -83,7 +110,9 @@ const App = () => {
   const handleFetchStories = React.useCallback(async () => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' });
     try {
-      const result = await axios.get(url);
+      // The other urls besides lastUrl will be used as indicators for previous searches
+      const lastUrl = urls[urls.length - 1];
+      const result = await axios.get(lastUrl);
 
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
@@ -92,7 +121,7 @@ const App = () => {
     } catch {
       dispatchStories({ type: 'STORIES_FETCH_FAILURE'});
     }
-  }, [url]);
+  }, [urls]);
 
   // Side-effect that calls handleFetchStories() if handleFetchStories isn't already populated?
   React.useEffect(() => {
@@ -114,11 +143,28 @@ const App = () => {
 
   // Function that handles the submission of the form for the search. Sets the url in the state.
   const handleSearchSubmit = (event) => {
-    setUrl(`${API_ENDPOINT}${searchTerm}`);
+    handleSearch(searchTerm);
 
     // Prevents browser from reloading when search is submitted
     event.preventDefault();
   }
+
+  // Function that handles the most recent search made
+  const handleLastSearch = searchTerm => {
+    // If the corresponding button is clicked, it sets the searchTerm to that
+    setSearchTerm(searchTerm);
+
+    handleSearch(searchTerm);
+  };
+
+  // Consolidated function for setting urls in urls state var
+  const handleSearch = searchTerm => {
+    const url = getUrl(searchTerm);
+    setUrls(urls.concat(url));
+  }
+
+  // Get the last 5 searches made and store in an array variable
+  const lastSearches = getLastSearches(urls);
 
   // Return code that will be used in index.js
   return (
@@ -130,6 +176,8 @@ const App = () => {
         onSearchInput={handleSearchInput}
         onSearchSubmit={handleSearchSubmit}
       />
+
+      <LastSearches lastSearches={lastSearches} onLastSearch={handleLastSearch} />
 
       {stories.isError && <p>Something went wrong ...</p>}
 
@@ -269,6 +317,19 @@ const Item = ( { item, onRemoveItem } ) => {
     </div>
   );
 }
+
+// LastSearches component that handles the row of buttons of the previous 5 searches
+const LastSearches = ({ lastSearches, onLastSearch }) => (
+  <>
+    {/* Give the searchTerm an index so that reused searches won't break it */}
+    {lastSearches.map((searchTerm, index) => (
+      <button key={searchTerm + index} type="button" onClick={() => onLastSearch(searchTerm)}>
+        {searchTerm}
+      </button>
+    ))}
+  </>
+);
+
 /* APPLICATION END */
 
 // Export the App to the page that is importing it for use. In this case, it is index.js
