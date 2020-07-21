@@ -207,15 +207,23 @@ const SORTS = {
 
 // List component that contains the query of items from the search
 const List = ({ list, onRemoveItem }) => {
-  const [sort, setSort] = React.useState('NONE');
+  const [sort, setSort] = React.useState({
+    sortKey: 'NONE',
+    isReverse: false
+  });
 
   // Take the state and apply it to a new sortFunction before generating the new sortedList to be mapped over
   const handleSort = (sortKey) => {
-    setSort(sortKey);
+    // Check to see if current sortKey is equal to passed sortKey AND if sort is not already false. If both pass, then isReverse is true, and the list should be sorted in reverse
+    const isReverse = sort.sortKey === sortKey && !sort.isReverse;
+    setSort({sortKey, isReverse});
   }
 
-  const sortFunction = SORTS[sort];
-  const sortedList = sortFunction(list);
+  const sortFunction = SORTS[sort.sortKey];
+  // If isReverse is true, sort the list in reverse; else sort the list normally.
+  const sortedList = sort.isReverse
+    ? sortFunction(list).reverse()
+    : sortFunction(list);
 
   return (
     <div>
