@@ -53,6 +53,42 @@
   letter-spacing: 2px;
 }
 
+/* navbar start */
+
+#navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #081b08;
+}
+
+#navbar ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 30px;
+}
+
+#navbar ul li {
+  padding: 0px 14px 0px 14px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #ffffff;
+  font-family: Courier, sans-serif;
+}
+
+/* Bootstrap override to fix padding on navbar */
+
+#bootstrap-override-ul {
+  margin: auto;
+}
+
+/* navbar end */
+
 .item {
   display: flex;
   align-items: center;
